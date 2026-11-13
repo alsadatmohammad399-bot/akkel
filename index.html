@@ -1,82 +1,87 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>أكّيل - توصيل أكل إسماعيلية</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أكّيل | AKKEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:sans-serif;background:#f8f8f8;color:#222}
-header{background:#111;color:#fff;padding:15px;text-align:center;position:sticky;top:0;z-index:10}
-header h1{margin:0;color:#00ff88}
-.rest-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
-.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px #0001;cursor:pointer}
-.card img{width:100%;height:120px;object-fit:cover}
-.card .info{padding:10px}
-.card b{display:block}
-.btn{background:#111;color:#00ff88;border:0;padding:12px 18px;border-radius:10px;font-weight:bold;width:100%;margin-top:8px}
-.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:20}
-.modal-box{background:#fff;width:90%;max-width:400px;border-radius:20px;padding:20px}
-.modal-box input{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px}
-.wa{color:#25D366}
+*{box-sizing:border-box;font-family:'Cairo',sans-serif}
+body{margin:0;background:#0a0a0a;color:#fff;min-height:100vh}
+header{padding:20px 15px 10px;position:sticky;top:0;background:#0a0a0a;z-index:10;border-bottom:1px solid #1a1a1a}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:28px;font-weight:800;letter-spacing:1px}
+.logo span{color:#00ff88}
+.badge{background:#00ff88;color:#000;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
+.search{margin:15px 0;background:#161616;border:1px solid #222;border-radius:14px;padding:12px 15px;display:flex;gap:10px;color:#666}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 15px 100px}
+.card{background:#161616;border:1px solid #222;border-radius:20px;overflow:hidden;transition:.2s}
+.card:active{transform:scale(.97)}
+.card img{width:100%;height:130px;object-fit:cover}
+.card-body{padding:12px}
+.card-body b{font-size:15px;display:block}
+.card-body small{color:#888;font-size:11px}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.dot{width:8px;height:8px;background:#00ff88;border-radius:50%;display:inline-block;box-shadow:0 0 8px #00ff88}
+.price{color:#00ff88;font-weight:800}
+.modal{position:fixed;inset:0;background:#000c;display:none;align-items:end;justify-content:center;z-index:50}
+.sheet{background:#151515;width:100%;max-width:500px;border-radius:28px 28px 0 0;padding:22px;border:1px solid #222;animation:up .3s}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet h3{margin:0 0 10px}
+.menu-btn{background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;width:100%;padding:14px;border-radius:14px;margin:6px 0;text-align:right;display:flex;justify-content:space-between}
+.menu-btn.active{background:#00ff88;color:#000;border-color:#00ff88;font-weight:800}
+.input{background:#0f0f0f;border:1px solid #222;border-radius:12px;padding:14px;width:100%;margin:7px 0;color:#fff}
+.cta{background:#00ff88;color:#000;border:0;width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:16px;margin-top:10px}
+.close{background:none;border:0;color:#666;width:100%;padding:10px}
+#status{text-align:center;color:#00ff88;margin-top:8px}
 </style>
 </head>
 <body>
 <header>
-<h1>🍔 أكّيل</h1>
-<small>توصيل أكل في إسماعيلية - ربحك 15%</small><br>
-<a href="admin.html" style="color:#888;font-size:12px">دخول الأدمن</a>
+<div class="top"><div class="logo">AKKEL<span>.</span></div><div class="badge">مفتوح • 15% ربح</div></div>
+<div class="search">🔍 <span>دور على مطعم في اسماعيلية...</span></div>
 </header>
 
-<div id="rests" class="rest-grid"></div>
+<div id="rests" class="grid"></div>
 
-<div id="orderModal" class="modal">
-<div class="modal-box">
-<h3 id="mRest">اطلب الآن</h3>
+<div id="modal" class="modal" onclick="if(event.target==this)closeM()">
+<div class="sheet">
+<h3 id="mTitle">اختار أكلك</h3>
 <div id="menu"></div>
-<input id="cName" placeholder="اسمك">
-<input id="cPhone" placeholder="رقمك 01xxxxxxxxx">
-<input id="cAddr" placeholder="عنوانك بالتفصيل">
-<button class="btn" onclick="sendOrder()">تأكيد الطلب + واتساب تلقائي</button>
-<button onclick="closeModal()" style="background:none;border:0;width:100%;margin-top:10px">إلغاء</button>
-<p id="status" style="text-align:center"></p>
+<input id="cName" class="input" placeholder="اسمك">
+<input id="cPhone" class="input" placeholder="رقمك 01xxxxxxxxx">
+<input id="cAddr" class="input" placeholder="عنوانك - المنطقة والشارع">
+<button class="cta" onclick="sendOrder()">تأكيد الطلب 🛵</button>
+<button class="close" onclick="closeM()">إلغاء</button>
+<p id="status"></p>
 </div>
 </div>
 
 <script src="restaurants.js"></script>
 <script>
-let selRest=null, selItem=null, selPrice=0;
+let selRest=null,selItem=null;
 function render(){
 let h="";restaurants.forEach(r=>{
-h+=`<div class="card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="info"><b>${r.name}</b><small>${r.menu.length} أصناف</small></div></div>`
+h+=`<div class="card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="card-body"><b>${r.name}</b><small><span class="dot"></span> 25-35 دقيقة • توصيل 20ج</small><div class="card-foot"><span class="price">يبدأ من ${r.menu[0].p}ج</span><span>↗</span></div></div></div>`
 });
 document.getElementById("rests").innerHTML=h;
 }
-function openRest(id){
-selRest=restaurants.find(r=>r.id===id);
-document.getElementById("mRest").innerText=selRest.name;
-let m="";selRest.menu.forEach((it,i)=>{m+=`<button class="btn" style="background:#eee;color:#000" onclick="pickItem(${i})">${it.n} - ${it.p}ج</button>`});
-document.getElementById("menu").innerHTML=m;
-document.getElementById("orderModal").style.display="flex";
-}
-function pickItem(i){selItem=restaurants.find(r=>r.id===selRest.id).menu[i];selPrice=selItem.p;document.getElementById("mRest").innerText=`${selRest.name} - ${selItem.n} ${selItem.p}ج`; }
-function closeModal(){document.getElementById("orderModal").style.display="none"}
+function openRest(id){selRest=restaurants.find(x=>x.id===id);selItem=null;document.getElementById("mTitle").innerText=selRest.name;let m="";selRest.menu.forEach((it,i)=>{m+=`<button id="it${i}" class="menu-btn" onclick="pick(${i})"><span>${it.n}</span><span>${it.p}ج</span></button>`});document.getElementById("menu").innerHTML=m;document.getElementById("modal").style.display="flex"}
+function pick(i){document.querySelectorAll(".menu-btn").forEach(b=>b.classList.remove("active"));document.getElementById("it"+i).classList.add("active");selItem=selRest.menu[i]}
+function closeM(){document.getElementById("modal").style.display="none"}
 async function sendOrder(){
-let name=cName.value, phone=cPhone.value, addr=cAddr.value;
-if(!name||!phone||!addr||!selItem)return alert("كمل بياناتك واختار صنف");
-let total=selPrice+20;let profit=Math.round(selPrice*0.15);
-document.getElementById("status").innerText="جاري الارسال...";
+let name=cName.value,phone=cPhone.value,addr=cAddr.value;
+if(!selItem)return alert("اختار صنف الأول");if(!name||!phone||!addr)return alert("كمل بياناتك");
+let total=selItem.p+20,profit=Math.round(selItem.p*0.15);
+status.innerText="⏳ بيتم الارسال...";
 let payload={restaurant:selRest.name,item:selItem.n+" - "+selItem.p+"ج",total,profit,name,phone,addr};
 try{
-let res=await fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-let data=await res.json();
-// حفظ محلي للادمن
-let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");
-arr.push({...payload,time:new Date().toLocaleString()});localStorage.setItem("akkel_orders",JSON.stringify(arr));
-document.getElementById("status").innerText="✅ تم! هيجيلك واتساب حالاً";
-let wa=`https://wa.me/2${phone}?text=أهلا ${name} طلبك من ${selRest.name} (${selItem.n}) تم ✅ الاجمالي ${total}ج - تتبع الدليفري: https://alsadatmohammad399-bot.github.io/akkel/delivery.html?name=${name}&phone=${phone} - أكيل`;
+await fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");arr.push({...payload,time:new Date().toLocaleString()});localStorage.setItem("akkel_orders",JSON.stringify(arr));
+status.innerText="✅ تم! بنفتحلك الواتساب...";
+let wa=`https://wa.me/2${phone}?text=أهلا ${name} طلبك من ${selRest.name} (${selItem.n}) تم ✅ الاجمالي ${total}ج - تتبع: https://alsadatmohammad399-bot.github.io/akkel/delivery.html`;
 window.open(wa,"_blank");
-setTimeout(()=>{location.href=`delivery.html?name=${name}&phone=${phone}`},1500);
-}catch(e){document.getElementById("status").innerText="حصل خطأ، جرب تاني";console.log(e)}
+setTimeout(()=>{location.href=`delivery.html?name=${name}&phone=${phone}`},1200);
+}catch(e){status.innerText="❌ خطأ، جرب تاني"}
 }
 render();
 </script>
