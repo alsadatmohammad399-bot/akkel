@@ -1,0 +1,16 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>تتبع الدليفري</title><style>body{font-family:sans-serif;background:#f5f5f5;padding:20px}.box{background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 12px #0001}#chat{height:200px;overflow:auto;border:1px solid #ddd;padding:10px;border-radius:8px;margin:10px 0;background:#fafafa}.msg{margin:6px;padding:8px 12px;border-radius:12px;max-width:80%}.me{background:#dcf8c6;margin-left:auto}.driver{background:#fff;margin-right:auto;border:1px solid #ddd}</style></head><body>
+<div class="box">
+<h2>🛵 الدليفري</h2>
+<p><b>الاسم:</b> <span id="dName">أحمد - طيار أكيل</span><br><b>الرقم:</b> <a id="dPhone" href="tel:01012345678">01012345678</a></p>
+<a id="waBtn" target="_blank"><button style="background:#25D366;color:#fff;padding:12px;width:100%;border:0;border-radius:10px;font-size:18px">💬 واتساب الدليفري</button></a>
+<h3>💬 شات مباشر مع الدليفري</h3>
+<div id="chat"></div>
+<input id="msgInput" placeholder="اكتب رسالتك..."><button onclick="sendMsg()">ارسال</button>
+</div>
+<script>
+const params=new URLSearchParams(location.search);
+const customerName=params.get("name")||"عميل";
+const customerPhone=params.get("phone")||"";
+document.getElementById("waBtn").href=`https://wa.me/201012345678?text=أهلا ${customerName} أنا دليفري أكيل في الطريق ليك`;
+function sendMsg(){let t=msgInput.value;if(!t)return;let c=document.getElementById("chat");c.innerHTML+=`<div class="msg me">${t}</div>`;msgInput.value="";fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({restaurant:"شات دليفري",item:t,total:"0",profit:"0",name:customerName,phone:customerPhone,addr:"شات"})});setTimeout(()=>{c.innerHTML+=`<div class="msg driver">تمام يا ${customerName} جايلك حالاً 🛵</div>`;c.scrollTop=c.scrollHeight},1000)}
+</script></body></html>
