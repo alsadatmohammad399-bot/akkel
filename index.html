@@ -2,55 +2,83 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>أكّيل - إسماعيلية</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أكّيل - توصيل أكل إسماعيلية</title>
 <style>
-body{font-family:system-ui;background:#FFF8F0;margin:0}
-header{background:#FF3B30;color:#fff;padding:15px;text-align:center;font-weight:bold;font-size:22px}
-.container{padding:15px}
-.card{background:#fff;border-radius:15px;padding:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
-.btn{background:#FF3B30;color:#fff;border:none;padding:12px;width:100%;border-radius:10px;font-weight:bold;font-size:16px}
+*{box-sizing:border-box}body{margin:0;font-family:sans-serif;background:#f8f8f8;color:#222}
+header{background:#111;color:#fff;padding:15px;text-align:center;position:sticky;top:0;z-index:10}
+header h1{margin:0;color:#00ff88}
+.rest-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px #0001;cursor:pointer}
+.card img{width:100%;height:120px;object-fit:cover}
+.card .info{padding:10px}
+.card b{display:block}
+.btn{background:#111;color:#00ff88;border:0;padding:12px 18px;border-radius:10px;font-weight:bold;width:100%;margin-top:8px}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:20}
+.modal-box{background:#fff;width:90%;max-width:400px;border-radius:20px;padding:20px}
+.modal-box input{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px}
+.wa{color:#25D366}
 </style>
 </head>
 <body>
-<header>🍔 أكّيل إسماعيلية - عمولة 15%</header>
-<div class="container">
-  <div class="card">
-    <h3>برجر فاكتوري</h3>
-    <p>دبل تشيز برجر - 135ج</p>
-    <button class="btn" onclick="orderNow('برجر فاكتوري','دبل تشيز برجر',135)">اطلب الآن - 155ج بالتوصيل</button>
-  </div>
-  <div id="status" style="text-align:center;margin-top:20px;font-weight:bold"></div>
+<header>
+<h1>🍔 أكّيل</h1>
+<small>توصيل أكل في إسماعيلية - ربحك 15%</small><br>
+<a href="admin.html" style="color:#888;font-size:12px">دخول الأدمن</a>
+</header>
+
+<div id="rests" class="rest-grid"></div>
+
+<div id="orderModal" class="modal">
+<div class="modal-box">
+<h3 id="mRest">اطلب الآن</h3>
+<div id="menu"></div>
+<input id="cName" placeholder="اسمك">
+<input id="cPhone" placeholder="رقمك 01xxxxxxxxx">
+<input id="cAddr" placeholder="عنوانك بالتفصيل">
+<button class="btn" onclick="sendOrder()">تأكيد الطلب + واتساب تلقائي</button>
+<button onclick="closeModal()" style="background:none;border:0;width:100%;margin-top:10px">إلغاء</button>
+<p id="status" style="text-align:center"></p>
+</div>
 </div>
 
+<script src="restaurants.js"></script>
 <script>
-async function orderNow(restaurant, item, price){
-  const total = price + 20;
-  const profit = Math.round(total*0.15);
-  const name = prompt("اسمك؟") || "عميل";
-  const phone = prompt("رقم موبايلك؟") || "01000000000";
-  const addr = prompt("عنوانك؟") || "حي الزهور";
-
-  document.getElementById('status').innerText = "جاري الإرسال...⏳";
-
-  // ده بيكلم الـ API الآمن بتاعك على Vercel (مش بيكلم تليجرام مباشر)
-  try{
-    const res = await fetch("https://akkel.vercel.app/api/order", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({restaurant, item, price, total, profit, name, phone, addr})
-    });
-    const data = await res.json();
-    if(data.ok){
-      document.getElementById('status').innerText = "✅ تم! الطلب وصلك على @akkel_ism_bot";
-    } else {
-      document.getElementById('status').innerText = "❌ " + data.error;
-    }
-  } catch(e){
-    // لو لسه معملتش Vercel، هيشتغل مؤقتاً بالطريقة المباشرة (للتست بس)
-    document.getElementById('status').innerText = "⚠️ لسه محتاج تظبط Vercel - قولّي ابعت ملف الـ API";
-  }
+let selRest=null, selItem=null, selPrice=0;
+function render(){
+let h="";restaurants.forEach(r=>{
+h+=`<div class="card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="info"><b>${r.name}</b><small>${r.menu.length} أصناف</small></div></div>`
+});
+document.getElementById("rests").innerHTML=h;
 }
+function openRest(id){
+selRest=restaurants.find(r=>r.id===id);
+document.getElementById("mRest").innerText=selRest.name;
+let m="";selRest.menu.forEach((it,i)=>{m+=`<button class="btn" style="background:#eee;color:#000" onclick="pickItem(${i})">${it.n} - ${it.p}ج</button>`});
+document.getElementById("menu").innerHTML=m;
+document.getElementById("orderModal").style.display="flex";
+}
+function pickItem(i){selItem=restaurants.find(r=>r.id===selRest.id).menu[i];selPrice=selItem.p;document.getElementById("mRest").innerText=`${selRest.name} - ${selItem.n} ${selItem.p}ج`; }
+function closeModal(){document.getElementById("orderModal").style.display="none"}
+async function sendOrder(){
+let name=cName.value, phone=cPhone.value, addr=cAddr.value;
+if(!name||!phone||!addr||!selItem)return alert("كمل بياناتك واختار صنف");
+let total=selPrice+20;let profit=Math.round(selPrice*0.15);
+document.getElementById("status").innerText="جاري الارسال...";
+let payload={restaurant:selRest.name,item:selItem.n+" - "+selItem.p+"ج",total,profit,name,phone,addr};
+try{
+let res=await fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+let data=await res.json();
+// حفظ محلي للادمن
+let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");
+arr.push({...payload,time:new Date().toLocaleString()});localStorage.setItem("akkel_orders",JSON.stringify(arr));
+document.getElementById("status").innerText="✅ تم! هيجيلك واتساب حالاً";
+let wa=`https://wa.me/2${phone}?text=أهلا ${name} طلبك من ${selRest.name} (${selItem.n}) تم ✅ الاجمالي ${total}ج - تتبع الدليفري: https://alsadatmohammad399-bot.github.io/akkel/delivery.html?name=${name}&phone=${phone} - أكيل`;
+window.open(wa,"_blank");
+setTimeout(()=>{location.href=`delivery.html?name=${name}&phone=${phone}`},1500);
+}catch(e){document.getElementById("status").innerText="حصل خطأ، جرب تاني";console.log(e)}
+}
+render();
 </script>
 </body>
 </html>
