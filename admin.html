@@ -1,49 +1,15 @@
 <!DOCTYPE html>
-<html lang='ar' dir='rtl'><head><meta charset='UTF-8'><meta name="viewport" content="width=device-width"><title>سوبر أدمن - أكيل</title>
-<style>body{background:#111;color:#fff;padding:15px;font-family:sans-serif}input,button{padding:12px;width:100%;margin:6px 0;border-radius:10px;border:0}button{background:#00ff88;color:#000;font-weight:bold}.card{background:#222;padding:15px;border-radius:12px;margin:10px 0;border-right:4px solid #00ff88}.profit{color:#00ff88;font-size:20px}iframe{width:100%;height:400px;border:0;border-radius:12px}</style>
-</head><body>
-<h2>أكّيل - @Bbbfe44</h2>
-<p>البوت @akkel_ism_bot - ID 7385508210 متصل ✅</p>
-
-<div id="loginBox">
-<input id="pass" type="password" placeholder="باسورد الأدمن akkel2026">
-<button onclick="login()">دخول</button>
-</div>
-
-<div id="panel" style="display:none">
-<p class="profit">ربحك اليوم 15%: <span id="profitToday">0</span>ج</p>
-<p>اجمالي الطلبات: <span id="count">0</span></p>
-
-<h3>📋 الطلبات الحية</h3>
-<div id="orders"></div>
-
-<h3>🍽️ قائمة المطاعم</h3>
-<div id="rests"></div>
-
-<h3>🛵 الدليفري</h3>
-<div class="card">
-<b>أحمد - طيار أكيل</b><br>
-📞 <a href="tel:01012345678" style="color:#00ff88">01012345678</a><br>
-<a href="delivery.html" style="color:#fff"><button>فتح صفحة تتبع الدليفري + شات</button></a>
-<a href="https://wa.me/201012345678" target="_blank"><button style="background:#25D366">💬 واتساب الدليفري</button></a>
-</div>
-
-<h3>📊 متجرك</h3>
-<a href="index.html"><button>فتح موقع العميل</button></a>
-</div>
-
-<script src="restaurants.js"></script>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ادمن - أكيل</title>
+<style>body{font-family:cairo;background:#111;color:#fff;padding:15px} .order{background:#222;padding:12px;border-radius:12px;margin:10px 0} button{padding:8px 12px;border-radius:8px;border:0;margin:3px;cursor:pointer} .green{background:#00b14f;color:#fff} .orange{background:#ff5a00;color:#fff}</style>
+</head>
+<body>
+<h2>لوحة الطلبات</h2>
+<div id="list"></div>
 <script>
-function login(){if(document.getElementById("pass").value!=="akkel2026")return alert("الباسورد غلط");document.getElementById("loginBox").style.display="none";document.getElementById("panel").style.display="block";loadData()}
-function loadData(){
-let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");
-let profit=0;arr.forEach(o=>profit+=o.profit||0);
-document.getElementById("profitToday").innerText=profit;
-document.getElementById("count").innerText=arr.length;
-let html="";arr.slice().reverse().forEach(o=>{
-html+=`<div class="card"><b>${o.restaurant||"مطعم"} - ${o.item||""}</b><br>👤 ${o.name} - 📞 ${o.phone}<br>🏠 ${o.addr||""}<br>💰 ${o.total}ج (ربح ${o.profit}ج)<br><small>${o.time}</small><br><a href="https://wa.me/2${o.phone}?text=طلبك وصل يا ${o.name} - أكيل" target="_blank"><button style="background:#25D366">واتساب تلقائي للعميل</button></a> <a href="delivery.html?name=${o.name}&phone=${o.phone}"><button>تتبع الدليفري</button></a></div>`;
-});
-document.getElementById("orders").innerHTML=html||"لسه مفيش طلبات";
-if(typeof restaurants!=="undefined"){let rHtml="";restaurants.forEach(r=>{rHtml+=`<div class="card">${r.name} - ${r.menu.length} أصناف</div>`});document.getElementById("rests").innerHTML=rHtml}
-}
-</script></body></html>
+function render(){let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");let h="";arr.reverse().forEach(o=>{h+=`<div class="order"><b>${o.restaurant} - ${o.item}</b><br>العميل: ${o.name} - ${o.phone}<br>العنوان: ${o.addr}<br>الاجمالي: ${o.total}ج - الحالة: ${o.status||'preparing'}<br><button class="orange" onclick="setStatus('${o.phone}','on_the_way')">الطيار استلم - شغل الخريطة للعميل</button><button class="green" onclick="setStatus('${o.phone}','delivered')">تم التوصيل</button></div>`});document.getElementById("list").innerHTML=h||"لا يوجد طلبات";}
+function setStatus(phone,status){let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");let o=arr.find(x=>x.phone===phone);if(o){o.status=status;localStorage.setItem("akkel_orders",JSON.stringify(arr));if(status==="on_the_way")localStorage.setItem("akkel_status","on_the_way");render()}}
+render();
+</script>
+</body>
+</html>
