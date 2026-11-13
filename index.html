@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang='ar' dir='rtl'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width'><title>أكّيل</title>
+<style>body{font-family:system-ui;background:#FFF8F0;margin:0}header{background:#FF3B30;color:#fff;padding:15px;text-align:center;font-weight:bold}.container{padding:15px}.card{background:#fff;border-radius:15px;padding:15px;margin-bottom:15px}.btn{background:#FF3B30;color:#fff;border:none;padding:12px;border-radius:10px;width:100%;font-weight:bold}</style></head><body>
+<header>🍔 أكّيل إسماعيلية - 15%</header>
+<div class='container'>
+<div class='card'><h3>برجر فاكتوري</h3><p>دبل تشيز برجر - 135ج</p><button class='btn' onclick="orderNow('برجر فاكتوري','دبل تشيز برجر',135)">اطلب الآن</button></div>
+<div id='status' style='text-align:center;color:green;margin-top:20px'></div>
+</div>
+<script>
+const ADMIN_CHAT_ID="7385508210";
+const BOT_TOKEN="9180812855:AAGKSnMk3BO9lIfSA0sQ-xp9P5vbsjJdUrg";
+async function orderNow(r,t,p){
+ let tot=p+20; let prof=Math.round(tot*0.15);
+ let n=prompt('اسمك؟')||'عميل'; let ph=prompt('موبايلك؟')||'01000000000'; let ad=prompt('عنوانك؟')||'الزهور';
+ let msg=`🍔 طلب جديد - أكّيل\n📍 ${r}\n🛒 ${t}\n👤 ${n} ${ph}\n🏠 ${ad}\n💰 ${tot}ج - ربحك ${prof}ج`;
+ document.getElementById('status').innerText='جاري الارسال...';
+ let res=await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_CHAT_ID}&text=${encodeURIComponent(msg)}`);
+ let d=await res.json();
+ document.getElementById('status').innerText=d.ok?'✅ وصل تليجرام @akkel_ism_bot':'❌ '+d.description
+}
+</script></body></html>
