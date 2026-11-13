@@ -4,122 +4,120 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>أكّيل - زي طلبات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;font-family:'Cairo',sans-serif}
-body{margin:0;background:#f5f5f5;color:#333}
-.topbar{background:#ff5a00;color:#fff;padding:14px 15px;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center}
-.topbar b{font-size:20px}
-.topbar small{background:#fff;color:#ff5a00;padding:3px 8px;border-radius:10px;font-weight:800}
-.grid{padding:12px;display:grid;grid-template-columns:1fr;gap:12px;padding-bottom:120px}
-.card{background:#fff;border-radius:16px;overflow:hidden;display:flex;box-shadow:0 2px 8px #0001}
-.card img{width:110px;height:110px;object-fit:cover}
-.card-info{padding:12px;flex:1}
-.card-info b{font-size:16px}
-.meta{color:#777;font-size:12px;margin:4px 0}
-.tag{background:#fff0e6;color:#ff5a00;font-size:11px;padding:2px 6px;border-radius:6px;font-weight:700}
-.sheet{position:fixed;inset:0;background:#0006;display:none;z-index:20;align-items:end}
-.sheet-box{background:#fff;width:100%;max-height:85vh;border-radius:20px 20px 0 0;overflow:auto}
-.sheet-head{padding:16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;position:sticky;top:0;background:#fff}
-.item-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f5f5}
-.q{display:flex;align-items:center;gap:10px}
-.q button{width:32px;height:32px;border-radius:50%;border:1px solid #ddd;background:#fff;font-weight:800;font-size:18px}
-.q button.plus{background:#ff5a00;color:#fff;border-color:#ff5a00}
-.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:12px 15px;display:none;z-index:15}
+body{margin:0;background:#f7f7f7}
+.header{position:sticky;top:0;z-index:1000;background:#fff;box-shadow:0 2px 10px #0001}
+.top{display:flex;gap:10px;padding:12px 15px;align-items:center}
+.loc{flex:1;background:#f5f5f5;border-radius:12px;padding:10px 12px;font-size:13px}
+.loc b{display:block;font-size:14px}
+.search{margin:0 15px 12px;background:#f5f5f5;border-radius:12px;padding:12px;display:flex;gap:8px}
+.search input{border:0;background:transparent;width:100%;outline:none}
+.cats{display:flex;gap:10px;overflow:auto;padding:0 15px 12px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{white-space:nowrap;background:#fff;border:1px solid #eee;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700}
+.cat.active{background:#ff5a00;color:#fff;border-color:#ff5a00}
+.rest-list{padding:12px 15px 120px;display:grid;gap:14px}
+.rest-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px #0001}
+.rest-card img{width:100%;height:160px;object-fit:cover}
+.rest-info{padding:12px}
+.rest-info .title{font-weight:800;font-size:17px;display:flex;justify-content:space-between}
+.badges{display:flex;gap:6px;margin:6px 0}
+.badge{font-size:11px;padding:3px 8px;border-radius:6px;background:#f0f0f0}
+.badge.green{background:#e6f9ed;color:#0a7a33}
+.map-box{height:180px;margin:12px 15px;border-radius:16px;overflow:hidden;border:1px solid #ddd}
+#map{height:100%;width:100%}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 15px;border-top:1px solid #eee;display:none;z-index:1001}
 .cart-bar.show{display:block}
-.cart-top{display:flex;justify-content:space-between;font-size:13px;color:#555}
-.cta{background:#00cc6a;color:#fff;border:0;width:100%;padding:15px;border-radius:12px;font-weight:800;font-size:16px;margin-top:8px}
-.inputs{padding:12px 16px;background:#fafafa}
-.input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
+.cart-bar .cta{background:#ff5a00;color:#fff;border:0;width:100%;padding:15px;border-radius:12px;font-weight:800;font-size:16px}
+.sheet{position:fixed;inset:0;background:#0006;z-index:2000;display:none}
+.sheet.show{display:flex;align-items:end}
+.sheet-in{background:#fff;width:100%;max-height:90vh;border-radius:20px 20px 0 0;overflow:auto}
+.item{padding:14px 16px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center}
+.q{display:flex;align-items:center;gap:10px}
+.q button{width:34px;height:34px;border-radius:50%;border:1px solid #ddd;background:#fff;font-size:20px;font-weight:800}
+.q .plus{background:#ff5a00;color:#fff;border-color:#ff5a00}
+.inputs{padding:15px;background:#fafafa}
+.input{width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
 </style>
 </head>
 <body>
-<div class="topbar"><b>أكّيل 🍔</b><small>توصيل إسماعيلية</small></div>
-<div id="rests" class="grid"></div>
+<div class="header">
+<div class="top"><div class="loc" onclick="pickLoc()">📍 <b id="locText">حدد موقعك - اسماعيلية</b><small>دوس لتحديد عنوانك على الخريطة</small></div><a href="admin.html" style="font-size:12px;color:#999">ادمن</a></div>
+<div class="search">🔍<input id="searchIn" placeholder="دور على مطعم او وجبة..." oninput="filter()"></div>
+<div class="cats" id="cats"></div>
+</div>
+
+<div class="map-box"><div id="map"></div></div>
+
+<div id="rests" class="rest-list"></div>
 
 <div id="cartBar" class="cart-bar">
-<div class="cart-top"><span id="cartCount">0 صنف</span><span id="cartTotal">0ج</span></div>
-<button class="cta" onclick="openSheet()">عرض السلة والطلب</button>
+<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span id="cartCount"></span><span id="cartPrice" style="font-weight:800"></span></div>
+<button class="cta" onclick="openSheet()">عرض السلة 🛒</button>
 </div>
 
 <div id="sheet" class="sheet" onclick="if(event.target==this)closeSheet()">
-<div class="sheet-box">
-<div class="sheet-head"><b id="sheetTitle">سلة الطلبات</b><span onclick="closeSheet()" style="font-size:22px">✕</span></div>
-<div id="cartItems"></div>
+<div class="sheet-in">
+<div style="padding:16px;display:flex;justify-content:space-between;border-bottom:1px solid #eee"><b id="sheetTitle"></b><span onclick="closeSheet()" style="font-size:22px">✕</span></div>
+<div id="menuList"></div>
 <div class="inputs">
 <input id="cName" class="input" placeholder="اسمك">
 <input id="cPhone" class="input" placeholder="رقمك 01xxxxxxxxx">
-<input id="cAddr" class="input" placeholder="عنوانك بالتفصيل">
-<button class="cta" style="background:#ff5a00" onclick="sendOrder()">تأكيد الطلب - واتساب تلقائي</button>
+<input id="cAddr" class="input" placeholder="عنوانك من الخريطة">
+<button class="cta" style="background:#00b14f" onclick="sendOrder()">تأكيد الطلب - واتساب تلقائي</button>
 <p id="status" style="text-align:center"></p>
 </div>
 </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="restaurants.js"></script>
 <script>
-let selRest=null, cart=[];
-function renderRests(){
-let h="";restaurants.forEach(r=>{
-h+=`<div class="card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="card-info"><b>${r.name}</b><div class="meta">⭐ 4.6 • 25-35 دقيقة • <span class="tag">توصيل 20ج</span></div><div style="font-size:12px;color:#999">${r.menu.slice(0,2).map(x=>x.n).join(" • ")}</div></div></div>`
-});document.getElementById("rests").innerHTML=h;
+let cats=["الكل","برجر","بيتزا","كشري","مشويات","فطير","سوري","فرايد"],selCat="الكل",selRest=null,cart=[],userLat=30.585, userLng=32.27;
+let map=L.map('map').setView([30.585,32.27],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let marker=L.marker([30.585,32.27],{draggable:true}).addTo(map);
+marker.on('dragend',e=>{let p=e.target.getLatLng();userLat=p.lat;userLng=p.lng;document.getElementById("cAddr").value=`https://maps.google.com/?q=${p.lat},${p.lng}`; document.getElementById("locText").innerText="تم تحديد موقعك ✅"});
+
+function renderCats(){let h="";cats.forEach(c=>h+=`<div class="cat ${c===selCat?'active':''}" onclick="setCat('${c}')">${c}</div>`);document.getElementById("cats").innerHTML=h}
+function setCat(c){selCat=c;renderCats();filter()}
+function filter(){let q=document.getElementById("searchIn").value.toLowerCase();let list=restaurants.filter(r=> (selCat==="الكل"||r.cat===selCat) && (r.name.toLowerCase().includes(q)||r.menu.some(m=>m.n.toLowerCase().includes(q))) );renderRests(list)}
+function renderRests(list=restaurants){
+let h="";list.forEach(r=>{h+=`<div class="rest-card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="rest-info"><div class="title"><span>${r.name}</span><span style="color:#ff5a00">↗</span></div><div class="badges"><span class="badge green">⭐ 4.6</span><span class="badge">${r.cat}</span><span class="badge">25-35 دقيقة</span></div><div style="color:#777;font-size:12px">${r.menu.map(x=>x.n).slice(0,3).join(" • ")}</div></div></div>`});document.getElementById("rests").innerHTML=h;
 }
 function openRest(id){
-selRest=restaurants.find(r=>r.id===id);
-if(cart.length>0 && cart[0].restId!==id){ if(!confirm("عايز تمسح سلة المطعم القديم وتبدأ في "+selRest.name+"؟")) return; cart=[]; }
+selRest=restaurants.find(x=>x.id===id);
+if(cart.length && cart[0].restId!==id && !confirm(`تمسح سلة ${cart[0].restName} وتبدأ في ${selRest.name}؟`)) return;
+if(cart.length && cart[0].restId!==id) cart=[];
 document.getElementById("sheetTitle").innerText=selRest.name;
-renderCart();openSheet();
+renderMenu();openSheet();updateBar();
 }
-function addItem(menuIndex){
-let menuItem=selRest.menu[menuIndex];
-let found=cart.find(c=>c.n===menuItem.n && c.restId===selRest.id);
-if(found) found.qty++; else cart.push({restId:selRest.id,restName:selRest.name,n:menuItem.n,p:menuItem.p,qty:1});
-renderCart();
+function addItem(i){let it=selRest.menu[i];let f=cart.find(c=>c.n===it.n);if(f)f.qty++;else cart.push({restId:selRest.id,restName:selRest.name,n:it.n,p:it.p,qty:1});renderMenu();updateBar()}
+function chQty(n,d){let f=cart.find(c=>c.n===n);if(!f)return;f.qty+=d;if(f.qty<=0)cart=cart.filter(c=>c.n!==n);renderMenu();updateBar()}
+function renderMenu(){
+let h="";selRest.menu.forEach((it,i)=>{let f=cart.find(c=>c.n===it.n);h+=`<div class="item"><div><b>${it.n}</b><div style="color:#777;font-size:13px">${it.p}ج</div></div><div class="q">${f?`<button onclick="chQty('${it.n}',-1)">-</button><span>${f.qty}</span><button class="plus" onclick="chQty('${it.n}',1)">+</button>`:`<button class="plus" onclick="addItem(${i})">+</button>`}</div></div>`});document.getElementById("menuList").innerHTML=h;
 }
-function changeQty(n,delta){
-let f=cart.find(c=>c.n===n); if(!f) return;
-f.qty+=delta; if(f.qty<=0) cart=cart.filter(c=>c.n!==n);
-renderCart();
-}
-function renderCart(){
-let itemsDiv=document.getElementById("cartItems");
-let html="";
-if(!selRest){itemsDiv.innerHTML=""; return}
-selRest.menu.forEach((it,i)=>{
-let inCart=cart.find(c=>c.n===it.n);
-html+=`<div class="item-row"><div><b>${it.n}</b><div style="color:#777;font-size:13px">${it.p}ج</div></div><div class="q">${inCart?`<button onclick="changeQty('${it.n}',-1)">-</button><span>${inCart.qty}</span><button class="plus" onclick="changeQty('${it.n}',1)">+</button>`:`<button class="plus" onclick="addItem(${i})">+</button>`}</div></div>`
-});
-itemsDiv.innerHTML=html;
-let total=0,count=0;cart.forEach(c=>{total+=c.p*c.qty;count+=c.qty});
-if(count>0){
-document.getElementById("cartBar").classList.add("show");
-document.getElementById("cartCount").innerText=`${count} صنف • ${selRest.name}`;
-document.getElementById("cartTotal").innerText=`${total+20}ج شامل التوصيل`;
-}else{
-document.getElementById("cartBar").classList.remove("show");
-}
-}
-function openSheet(){document.getElementById("sheet").style.display="flex"}
-function closeSheet(){document.getElementById("sheet").style.display="none"}
-
+function updateBar(){let c=0,t=0;cart.forEach(x=>{c+=x.qty;t+=x.p*x.qty});if(c>0){document.getElementById("cartBar").classList.add("show");document.getElementById("cartCount").innerText=`${c} منتج • ${cart[0].restName}`;document.getElementById("cartPrice").innerText=`${t+20}ج`; }else document.getElementById("cartBar").classList.remove("show")}
+function openSheet(){document.getElementById("sheet").classList.add("show")}function closeSheet(){document.getElementById("sheet").classList.remove("show")}
+function pickLoc(){document.querySelector(".map-box").scrollIntoView({behavior:"smooth"});alert("حرك الدبوس الأحمر لمكان بيتك على الخريطة وهيتحفظ تلقائي")}
 async function sendOrder(){
-let name=cName.value,phone=cPhone.value,addr=cAddr.value;
-if(cart.length==0) return alert("السلة فاضية");
-if(!name||!phone||!addr) return alert("كمل بياناتك");
-let itemsTotal=0;cart.forEach(c=>itemsTotal+=c.p*c.qty);
-let total=itemsTotal+20,profit=Math.round(itemsTotal*0.15);
+let name=cName.value,phone=cPhone.value,addr=cAddr.value||`https://maps.google.com/?q=${userLat},${userLng}`;
+if(!cart.length) return alert("السلة فاضية"); if(!name||!phone) return alert("كمل بياناتك");
+let itemsTotal=0;cart.forEach(c=>itemsTotal+=c.p*c.qty);let total=itemsTotal+20,profit=Math.round(itemsTotal*0.15);
 let itemsText=cart.map(c=>`${c.n} x${c.qty}`).join(" + ");
-document.getElementById("status").innerText="⏳ جاري الإرسال...";
-let payload={restaurant:selRest.name,item:itemsText,total,profit,name,phone,addr};
+status.innerText="⏳ بيتم الإرسال...";
+let payload={restaurant:selRest.name,item:itemsText,total,profit,name,phone,addr,location:`${userLat},${userLng}`};
 try{
 await fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
 let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");arr.push({...payload,time:new Date().toLocaleString()});localStorage.setItem("akkel_orders",JSON.stringify(arr));
-document.getElementById("status").innerText="✅ تم!";
-let wa=`https://wa.me/2${phone}?text=طلبك من ${selRest.name}: ${itemsText} - الاجمالي ${total}ج - أكيل`;
-window.open(wa,"_blank");
-setTimeout(()=>{location.href=`delivery.html?name=${name}&phone=${phone}`},1000);
-}catch(e){document.getElementById("status").innerText="❌ حصل خطأ"}
+status.innerText="✅ تم!";
+let wa=`https://wa.me/2${phone}?text=أهلا ${name} طلبك من ${selRest.name}: ${itemsText} الاجمالي ${total}ج موقعك: ${addr}`;
+window.open(wa,"_blank");setTimeout(()=>location.href=`delivery.html?name=${name}&phone=${phone}`,1000);
+}catch(e){status.innerText="❌ خطأ"}
 }
-renderRests();
+renderCats();renderRests();
 </script>
 </body>
 </html>
