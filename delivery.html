@@ -14,10 +14,12 @@ body{margin:0;background:#fff}
 .step{display:flex;gap:12px;margin:14px 0;align-items:center}
 .circle{width:32px;height:32px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:800}
 .circle.active{background:#00b14f;color:#fff}
+#mapBox{display:none}
+#waitingBox{padding:40px;text-align:center}
 .chat{margin-top:16px;border:1px solid #eee;border-radius:12px;overflow:hidden}
 .chat-head{background:#f5f5f5;padding:10px;font-weight:800}
 #msgs{height:180px;overflow:auto;padding:10px;background:#fafafa}
-.msg{background:#fff;padding:8px 12px;border-radius:10px;margin:6px 0;box-shadow:0 1px 2px #0001;max-width:80%}
+.msg{background:#fff;padding:8px 12px;border-radius:10px;margin:6px 0;max-width:80%}
 .msg.me{background:#ff5a00;color:#fff;margin-right:auto}
 .send{display:flex;gap:8px;padding:10px}
 .send input{flex:1;padding:12px;border:1px solid #ddd;border-radius:10px}
@@ -26,49 +28,29 @@ body{margin:0;background:#fff}
 </style>
 </head>
 <body>
-<div class="header"><b id="cust">جاري تحميل طلبك...</b></div>
-<div id="map"></div>
+<div class="header"><b id="cust">تتبع طلبك</b></div>
+<div id="mapBox"><div style="background:#00b14f;color:#fff;padding:10px;text-align:center">🛵 الطيار في الطريق - تتبع مباشر</div><div id="map"></div></div>
+<div id="waitingBox"><div style="font-size:50px">🍳</div><b>المطعم بيجهز طلبك...</b><br><small style="color:#777">الخريطة هتظهر اول ما الطيار يستلم الطلب ويتحرك</small><p style="margin-top:20px"><button onclick="startDelivery()" style="background:#111;color:#fff;padding:12px 20px;border-radius:10px;border:0">🧪 انا الطيار - استلمت الطلب (جربها)</button></p></div>
 <div class="info">
 <div class="pilot"><span>🛵 الطيار: أحمد - 01012345678</span><a href="tel:01012345678" style="color:#00ff88">اتصل</a></div>
 <div class="step"><div class="circle active">1</div><div>تم تأكيد الطلب</div></div>
 <div class="step"><div class="circle active">2</div><div>المطعم بيجهز الأكل</div></div>
 <div class="step"><div class="circle" id="s3">3</div><div>الطيار في الطريق اليك</div></div>
 <div class="step"><div class="circle" id="s4">4</div><div>تم التوصيل</div></div>
-
-<div class="chat">
-<div class="chat-head">💬 شات مع الطيار</div>
-<div id="msgs"><div class="msg">أهلا! طلبك في الطريق 🛵</div></div>
-<div class="send"><input id="msgIn" placeholder="اكتب رسالة..."><button onclick="sendMsg()">ارسال</button></div>
+<div class="chat"><div class="chat-head">💬 شات مع الطيار</div><div id="msgs"><div class="msg">أهلا! طلبك في الطريق 🛵</div></div><div class="send"><input id="msgIn" placeholder="اكتب رسالة..."><button onclick="sendMsg()">ارسال</button></div></div>
 </div>
-</div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let params=new URLSearchParams(location.search);
-let name=params.get("name")||"عميل",phone=params.get("phone")||"";
-document.getElementById("cust").innerText=`طلب ${name} - ${phone}`;
-
-let map=L.map('map').setView([30.585,32.27],14);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-let bike=L.marker([30.585,32.27]).addTo(map).bindPopup("الطيار 🛵");
-let home=L.marker([30.59,32.28]).addTo(map).bindPopup("بيتك 🏠");
-
-// حركة الطيار وهمية زي طلبات
-let lat=30.585,lng=32.27;
-setInterval(()=>{
-lat+=0.0003;lng+=0.0003;
-bike.setLatLng([lat,lng]);
-if(lat>30.588){document.getElementById("s3").classList.add("active")}
-if(lat>30.589){document.getElementById("s4").classList.add("active")}
-},2000);
-
-function sendMsg(){
-let t=document.getElementById("msgIn").value;if(!t)return;
-let d=document.createElement("div");d.className="msg me";d.innerText=t;
-document.getElementById("msgs").appendChild(d);
-document.getElementById("msgIn").value="";
-setTimeout(()=>{let r=document.createElement("div");r.className="msg";r.innerText="تمام يا فندم، 10 دقايق واكون عندك ✅";document.getElementById("msgs").appendChild(r);document.getElementById("msgs").scrollTop=9999},1000);
+let params=new URLSearchParams(location.search);let name=params.get("name")||"عميل",phone=params.get("phone")||"";document.getElementById("cust").innerText=`طلب ${name}`;
+let map=L.map('map').setView([30.585,32.27],14);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let bike=L.marker([30.585,32.27]).addTo(map).bindPopup("الطيار 🛵");let home=L.marker([30.59,32.28]).addTo(map).bindPopup("بيتك 🏠");
+function startDelivery(){
+document.getElementById("waitingBox").style.display="none";document.getElementById("mapBox").style.display="block";setTimeout(()=>map.invalidateSize(),200);
+document.getElementById("s3").classList.add("active");localStorage.setItem("akkel_status","on_the_way");
+let lat=30.585,lng=32.27;setInterval(()=>{lat+=0.0004;lng+=0.0004;bike.setLatLng([lat,lng]);if(lat>30.589)document.getElementById("s4").classList.add("active")},2000);
 }
+if(localStorage.getItem("akkel_status")==="on_the_way"){startDelivery()}
+function sendMsg(){let t=document.getElementById("msgIn").value;if(!t)return;let d=document.createElement("div");d.className="msg me";d.innerText=t;document.getElementById("msgs").appendChild(d);document.getElementById("msgIn").value="";setTimeout(()=>{let r=document.createElement("div");r.className="msg";r.innerText="تمام يا فندم، 10 دقايق واكون عندك ✅";document.getElementById("msgs").appendChild(r)},1000);}
 </script>
 </body>
 </html>
