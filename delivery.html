@@ -1,16 +1,74 @@
-<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>تتبع الدليفري</title><style>body{font-family:sans-serif;background:#f5f5f5;padding:20px}.box{background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 12px #0001}#chat{height:200px;overflow:auto;border:1px solid #ddd;padding:10px;border-radius:8px;margin:10px 0;background:#fafafa}.msg{margin:6px;padding:8px 12px;border-radius:12px;max-width:80%}.me{background:#dcf8c6;margin-left:auto}.driver{background:#fff;margin-right:auto;border:1px solid #ddd}</style></head><body>
-<div class="box">
-<h2>🛵 الدليفري</h2>
-<p><b>الاسم:</b> <span id="dName">أحمد - طيار أكيل</span><br><b>الرقم:</b> <a id="dPhone" href="tel:01012345678">01012345678</a></p>
-<a id="waBtn" target="_blank"><button style="background:#25D366;color:#fff;padding:12px;width:100%;border:0;border-radius:10px;font-size:18px">💬 واتساب الدليفري</button></a>
-<h3>💬 شات مباشر مع الدليفري</h3>
-<div id="chat"></div>
-<input id="msgInput" placeholder="اكتب رسالتك..."><button onclick="sendMsg()">ارسال</button>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تتبع طلبك - أكيل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{box-sizing:border-box;font-family:'Cairo',sans-serif}
+body{margin:0;background:#fff}
+.header{background:#ff5a00;color:#fff;padding:16px;text-align:center}
+#map{height:55vh;width:100%}
+.info{padding:16px}
+.step{display:flex;gap:12px;margin:14px 0;align-items:center}
+.circle{width:32px;height:32px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:800}
+.circle.active{background:#00b14f;color:#fff}
+.chat{margin-top:16px;border:1px solid #eee;border-radius:12px;overflow:hidden}
+.chat-head{background:#f5f5f5;padding:10px;font-weight:800}
+#msgs{height:180px;overflow:auto;padding:10px;background:#fafafa}
+.msg{background:#fff;padding:8px 12px;border-radius:10px;margin:6px 0;box-shadow:0 1px 2px #0001;max-width:80%}
+.msg.me{background:#ff5a00;color:#fff;margin-right:auto}
+.send{display:flex;gap:8px;padding:10px}
+.send input{flex:1;padding:12px;border:1px solid #ddd;border-radius:10px}
+.send button{background:#ff5a00;color:#fff;border:0;padding:0 18px;border-radius:10px;font-weight:800}
+.pilot{background:#111;color:#00ff88;padding:12px;border-radius:12px;display:flex;justify-content:space-between;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="header"><b id="cust">جاري تحميل طلبك...</b></div>
+<div id="map"></div>
+<div class="info">
+<div class="pilot"><span>🛵 الطيار: أحمد - 01012345678</span><a href="tel:01012345678" style="color:#00ff88">اتصل</a></div>
+<div class="step"><div class="circle active">1</div><div>تم تأكيد الطلب</div></div>
+<div class="step"><div class="circle active">2</div><div>المطعم بيجهز الأكل</div></div>
+<div class="step"><div class="circle" id="s3">3</div><div>الطيار في الطريق اليك</div></div>
+<div class="step"><div class="circle" id="s4">4</div><div>تم التوصيل</div></div>
+
+<div class="chat">
+<div class="chat-head">💬 شات مع الطيار</div>
+<div id="msgs"><div class="msg">أهلا! طلبك في الطريق 🛵</div></div>
+<div class="send"><input id="msgIn" placeholder="اكتب رسالة..."><button onclick="sendMsg()">ارسال</button></div>
 </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const params=new URLSearchParams(location.search);
-const customerName=params.get("name")||"عميل";
-const customerPhone=params.get("phone")||"";
-document.getElementById("waBtn").href=`https://wa.me/201012345678?text=أهلا ${customerName} أنا دليفري أكيل في الطريق ليك`;
-function sendMsg(){let t=msgInput.value;if(!t)return;let c=document.getElementById("chat");c.innerHTML+=`<div class="msg me">${t}</div>`;msgInput.value="";fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({restaurant:"شات دليفري",item:t,total:"0",profit:"0",name:customerName,phone:customerPhone,addr:"شات"})});setTimeout(()=>{c.innerHTML+=`<div class="msg driver">تمام يا ${customerName} جايلك حالاً 🛵</div>`;c.scrollTop=c.scrollHeight},1000)}
-</script></body></html>
+let params=new URLSearchParams(location.search);
+let name=params.get("name")||"عميل",phone=params.get("phone")||"";
+document.getElementById("cust").innerText=`طلب ${name} - ${phone}`;
+
+let map=L.map('map').setView([30.585,32.27],14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let bike=L.marker([30.585,32.27]).addTo(map).bindPopup("الطيار 🛵");
+let home=L.marker([30.59,32.28]).addTo(map).bindPopup("بيتك 🏠");
+
+// حركة الطيار وهمية زي طلبات
+let lat=30.585,lng=32.27;
+setInterval(()=>{
+lat+=0.0003;lng+=0.0003;
+bike.setLatLng([lat,lng]);
+if(lat>30.588){document.getElementById("s3").classList.add("active")}
+if(lat>30.589){document.getElementById("s4").classList.add("active")}
+},2000);
+
+function sendMsg(){
+let t=document.getElementById("msgIn").value;if(!t)return;
+let d=document.createElement("div");d.className="msg me";d.innerText=t;
+document.getElementById("msgs").appendChild(d);
+document.getElementById("msgIn").value="";
+setTimeout(()=>{let r=document.createElement("div");r.className="msg";r.innerText="تمام يا فندم، 10 دقايق واكون عندك ✅";document.getElementById("msgs").appendChild(r);document.getElementById("msgs").scrollTop=9999},1000);
+}
+</script>
+</body>
+</html>
