@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تتبع طلبك - أكيل</title>
+<title>تتبع طلبك</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
@@ -18,39 +18,51 @@ body{margin:0;background:#fff}
 #waitingBox{padding:40px;text-align:center}
 .chat{margin-top:16px;border:1px solid #eee;border-radius:12px;overflow:hidden}
 .chat-head{background:#f5f5f5;padding:10px;font-weight:800}
-#msgs{height:180px;overflow:auto;padding:10px;background:#fafafa}
+#msgs{height:150px;overflow:auto;padding:10px;background:#fafafa}
 .msg{background:#fff;padding:8px 12px;border-radius:10px;margin:6px 0;max-width:80%}
 .msg.me{background:#ff5a00;color:#fff;margin-right:auto}
 .send{display:flex;gap:8px;padding:10px}
 .send input{flex:1;padding:12px;border:1px solid #ddd;border-radius:10px}
 .send button{background:#ff5a00;color:#fff;border:0;padding:0 18px;border-radius:10px;font-weight:800}
-.pilot{background:#111;color:#00ff88;padding:12px;border-radius:12px;display:flex;justify-content:space-between;margin:12px 0}
 </style>
 </head>
 <body>
 <div class="header"><b id="cust">تتبع طلبك</b></div>
 <div id="mapBox"><div style="background:#00b14f;color:#fff;padding:10px;text-align:center">🛵 الطيار في الطريق - تتبع مباشر</div><div id="map"></div></div>
-<div id="waitingBox"><div style="font-size:50px">🍳</div><b>المطعم بيجهز طلبك...</b><br><small style="color:#777">الخريطة هتظهر اول ما الطيار يستلم الطلب ويتحرك</small><p style="margin-top:20px"><button onclick="startDelivery()" style="background:#111;color:#fff;padding:12px 20px;border-radius:10px;border:0">🧪 انا الطيار - استلمت الطلب (جربها)</button></p></div>
+<div id="waitingBox"><div style="font-size:50px">🍳</div><b>المطعم بيجهز طلبك...</b><br><small>الخريطة هتظهر اول ما الطيار يبدأ يتحرك</small></div>
 <div class="info">
-<div class="pilot"><span>🛵 الطيار: أحمد - 01012345678</span><a href="tel:01012345678" style="color:#00ff88">اتصل</a></div>
+<div style="background:#111;color:#00ff88;padding:12px;border-radius:12px;display:flex;justify-content:space-between"><span>🛵 الطيار: أحمد</span><a href="tel:01012345678" style="color:#00ff88">اتصل</a></div>
 <div class="step"><div class="circle active">1</div><div>تم تأكيد الطلب</div></div>
-<div class="step"><div class="circle active">2</div><div>المطعم بيجهز الأكل</div></div>
-<div class="step"><div class="circle" id="s3">3</div><div>الطيار في الطريق اليك</div></div>
+<div class="step"><div class="circle active">2</div><div>المطعم بيجهز</div></div>
+<div class="step"><div class="circle" id="s3">3</div><div>الطيار في الطريق</div></div>
 <div class="step"><div class="circle" id="s4">4</div><div>تم التوصيل</div></div>
 <div class="chat"><div class="chat-head">💬 شات مع الطيار</div><div id="msgs"><div class="msg">أهلا! طلبك في الطريق 🛵</div></div><div class="send"><input id="msgIn" placeholder="اكتب رسالة..."><button onclick="sendMsg()">ارسال</button></div></div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let params=new URLSearchParams(location.search);let name=params.get("name")||"عميل",phone=params.get("phone")||"";document.getElementById("cust").innerText=`طلب ${name}`;
+let params=new URLSearchParams(location.search);let phone=params.get("phone");let orderId=params.get("id")||phone;
+document.getElementById("cust").innerText=`طلب رقم ${orderId}`;
 let map=L.map('map').setView([30.585,32.27],14);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-let bike=L.marker([30.585,32.27]).addTo(map).bindPopup("الطيار 🛵");let home=L.marker([30.59,32.28]).addTo(map).bindPopup("بيتك 🏠");
-function startDelivery(){
-document.getElementById("waitingBox").style.display="none";document.getElementById("mapBox").style.display="block";setTimeout(()=>map.invalidateSize(),200);
-document.getElementById("s3").classList.add("active");localStorage.setItem("akkel_status","on_the_way");
-let lat=30.585,lng=32.27;setInterval(()=>{lat+=0.0004;lng+=0.0004;bike.setLatLng([lat,lng]);if(lat>30.589)document.getElementById("s4").classList.add("active")},2000);
+let bike=L.marker([30.585,32.27]).addTo(map).bindPopup("الطيار");let home=L.marker([30.59,32.28]).addTo(map).bindPopup("بيتك");
+let mapShown=false;
+function showMap(lat,lng){
+ if(!mapShown){document.getElementById("waitingBox").style.display="none";document.getElementById("mapBox").style.display="block";setTimeout(()=>map.invalidateSize(),300);document.getElementById("s3").classList.add("active");mapShown=true;}
+ bike.setLatLng([lat,lng]);
 }
-if(localStorage.getItem("akkel_status")==="on_the_way"){startDelivery()}
-function sendMsg(){let t=document.getElementById("msgIn").value;if(!t)return;let d=document.createElement("div");d.className="msg me";d.innerText=t;document.getElementById("msgs").appendChild(d);document.getElementById("msgIn").value="";setTimeout(()=>{let r=document.createElement("div");r.className="msg";r.innerText="تمام يا فندم، 10 دقايق واكون عندك ✅";document.getElementById("msgs").appendChild(r)},1000);}
+async function check(){
+ try{
+  let res=await fetch(`/api?type=track&id=${phone}`);
+  let data=await res.json();
+  if(data.order && data.order.status==="on_the_way"){
+    if(data.riderLoc) showMap(data.riderLoc.lat, data.riderLoc.lng);
+  }
+  if(data.order && data.order.status==="delivered"){
+    document.getElementById("s4").classList.add("active");
+  }
+ }catch(e){}
+}
+setInterval(check,3000);check();
+function sendMsg(){let t=document.getElementById("msgIn").value;if(!t)return;let d=document.createElement("div");d.className="msg me";d.innerText=t;document.getElementById("msgs").appendChild(d);document.getElementById("msgIn").value="";}
 </script>
 </body>
 </html>
