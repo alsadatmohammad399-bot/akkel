@@ -35,7 +35,7 @@ async function orderNow(restaurant, item, price){
 
   // ده بيكلم الـ API الآمن بتاعك على Vercel (مش بيكلم تليجرام مباشر)
   try{
-    const res = await fetch("https://akkel-ism.vercel.app/api/order", {
+    const res = await fetch("https://akkel.vercel.app/api/order", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({restaurant, item, price, total, profit, name, phone, addr})
