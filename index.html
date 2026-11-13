@@ -2,88 +2,124 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>أكّيل | AKKEL</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+<title>أكّيل - زي طلبات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;font-family:'Cairo',sans-serif}
-body{margin:0;background:#0a0a0a;color:#fff;min-height:100vh}
-header{padding:20px 15px 10px;position:sticky;top:0;background:#0a0a0a;z-index:10;border-bottom:1px solid #1a1a1a}
-.top{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:28px;font-weight:800;letter-spacing:1px}
-.logo span{color:#00ff88}
-.badge{background:#00ff88;color:#000;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
-.search{margin:15px 0;background:#161616;border:1px solid #222;border-radius:14px;padding:12px 15px;display:flex;gap:10px;color:#666}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 15px 100px}
-.card{background:#161616;border:1px solid #222;border-radius:20px;overflow:hidden;transition:.2s}
-.card:active{transform:scale(.97)}
-.card img{width:100%;height:130px;object-fit:cover}
-.card-body{padding:12px}
-.card-body b{font-size:15px;display:block}
-.card-body small{color:#888;font-size:11px}
-.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-.dot{width:8px;height:8px;background:#00ff88;border-radius:50%;display:inline-block;box-shadow:0 0 8px #00ff88}
-.price{color:#00ff88;font-weight:800}
-.modal{position:fixed;inset:0;background:#000c;display:none;align-items:end;justify-content:center;z-index:50}
-.sheet{background:#151515;width:100%;max-width:500px;border-radius:28px 28px 0 0;padding:22px;border:1px solid #222;animation:up .3s}
-@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet h3{margin:0 0 10px}
-.menu-btn{background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;width:100%;padding:14px;border-radius:14px;margin:6px 0;text-align:right;display:flex;justify-content:space-between}
-.menu-btn.active{background:#00ff88;color:#000;border-color:#00ff88;font-weight:800}
-.input{background:#0f0f0f;border:1px solid #222;border-radius:12px;padding:14px;width:100%;margin:7px 0;color:#fff}
-.cta{background:#00ff88;color:#000;border:0;width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:16px;margin-top:10px}
-.close{background:none;border:0;color:#666;width:100%;padding:10px}
-#status{text-align:center;color:#00ff88;margin-top:8px}
+body{margin:0;background:#f5f5f5;color:#333}
+.topbar{background:#ff5a00;color:#fff;padding:14px 15px;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center}
+.topbar b{font-size:20px}
+.topbar small{background:#fff;color:#ff5a00;padding:3px 8px;border-radius:10px;font-weight:800}
+.grid{padding:12px;display:grid;grid-template-columns:1fr;gap:12px;padding-bottom:120px}
+.card{background:#fff;border-radius:16px;overflow:hidden;display:flex;box-shadow:0 2px 8px #0001}
+.card img{width:110px;height:110px;object-fit:cover}
+.card-info{padding:12px;flex:1}
+.card-info b{font-size:16px}
+.meta{color:#777;font-size:12px;margin:4px 0}
+.tag{background:#fff0e6;color:#ff5a00;font-size:11px;padding:2px 6px;border-radius:6px;font-weight:700}
+.sheet{position:fixed;inset:0;background:#0006;display:none;z-index:20;align-items:end}
+.sheet-box{background:#fff;width:100%;max-height:85vh;border-radius:20px 20px 0 0;overflow:auto}
+.sheet-head{padding:16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;position:sticky;top:0;background:#fff}
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f5f5}
+.q{display:flex;align-items:center;gap:10px}
+.q button{width:32px;height:32px;border-radius:50%;border:1px solid #ddd;background:#fff;font-weight:800;font-size:18px}
+.q button.plus{background:#ff5a00;color:#fff;border-color:#ff5a00}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:12px 15px;display:none;z-index:15}
+.cart-bar.show{display:block}
+.cart-top{display:flex;justify-content:space-between;font-size:13px;color:#555}
+.cta{background:#00cc6a;color:#fff;border:0;width:100%;padding:15px;border-radius:12px;font-weight:800;font-size:16px;margin-top:8px}
+.inputs{padding:12px 16px;background:#fafafa}
+.input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
 </style>
 </head>
 <body>
-<header>
-<div class="top"><div class="logo">AKKEL<span>.</span></div><div class="badge">مفتوح • 15% ربح</div></div>
-<div class="search">🔍 <span>دور على مطعم في اسماعيلية...</span></div>
-</header>
-
+<div class="topbar"><b>أكّيل 🍔</b><small>توصيل إسماعيلية</small></div>
 <div id="rests" class="grid"></div>
 
-<div id="modal" class="modal" onclick="if(event.target==this)closeM()">
-<div class="sheet">
-<h3 id="mTitle">اختار أكلك</h3>
-<div id="menu"></div>
+<div id="cartBar" class="cart-bar">
+<div class="cart-top"><span id="cartCount">0 صنف</span><span id="cartTotal">0ج</span></div>
+<button class="cta" onclick="openSheet()">عرض السلة والطلب</button>
+</div>
+
+<div id="sheet" class="sheet" onclick="if(event.target==this)closeSheet()">
+<div class="sheet-box">
+<div class="sheet-head"><b id="sheetTitle">سلة الطلبات</b><span onclick="closeSheet()" style="font-size:22px">✕</span></div>
+<div id="cartItems"></div>
+<div class="inputs">
 <input id="cName" class="input" placeholder="اسمك">
 <input id="cPhone" class="input" placeholder="رقمك 01xxxxxxxxx">
-<input id="cAddr" class="input" placeholder="عنوانك - المنطقة والشارع">
-<button class="cta" onclick="sendOrder()">تأكيد الطلب 🛵</button>
-<button class="close" onclick="closeM()">إلغاء</button>
-<p id="status"></p>
+<input id="cAddr" class="input" placeholder="عنوانك بالتفصيل">
+<button class="cta" style="background:#ff5a00" onclick="sendOrder()">تأكيد الطلب - واتساب تلقائي</button>
+<p id="status" style="text-align:center"></p>
+</div>
 </div>
 </div>
 
 <script src="restaurants.js"></script>
 <script>
-let selRest=null,selItem=null;
-function render(){
+let selRest=null, cart=[];
+function renderRests(){
 let h="";restaurants.forEach(r=>{
-h+=`<div class="card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="card-body"><b>${r.name}</b><small><span class="dot"></span> 25-35 دقيقة • توصيل 20ج</small><div class="card-foot"><span class="price">يبدأ من ${r.menu[0].p}ج</span><span>↗</span></div></div></div>`
-});
-document.getElementById("rests").innerHTML=h;
+h+=`<div class="card" onclick="openRest(${r.id})"><img src="${r.img}"><div class="card-info"><b>${r.name}</b><div class="meta">⭐ 4.6 • 25-35 دقيقة • <span class="tag">توصيل 20ج</span></div><div style="font-size:12px;color:#999">${r.menu.slice(0,2).map(x=>x.n).join(" • ")}</div></div></div>`
+});document.getElementById("rests").innerHTML=h;
 }
-function openRest(id){selRest=restaurants.find(x=>x.id===id);selItem=null;document.getElementById("mTitle").innerText=selRest.name;let m="";selRest.menu.forEach((it,i)=>{m+=`<button id="it${i}" class="menu-btn" onclick="pick(${i})"><span>${it.n}</span><span>${it.p}ج</span></button>`});document.getElementById("menu").innerHTML=m;document.getElementById("modal").style.display="flex"}
-function pick(i){document.querySelectorAll(".menu-btn").forEach(b=>b.classList.remove("active"));document.getElementById("it"+i).classList.add("active");selItem=selRest.menu[i]}
-function closeM(){document.getElementById("modal").style.display="none"}
+function openRest(id){
+selRest=restaurants.find(r=>r.id===id);
+if(cart.length>0 && cart[0].restId!==id){ if(!confirm("عايز تمسح سلة المطعم القديم وتبدأ في "+selRest.name+"؟")) return; cart=[]; }
+document.getElementById("sheetTitle").innerText=selRest.name;
+renderCart();openSheet();
+}
+function addItem(menuIndex){
+let menuItem=selRest.menu[menuIndex];
+let found=cart.find(c=>c.n===menuItem.n && c.restId===selRest.id);
+if(found) found.qty++; else cart.push({restId:selRest.id,restName:selRest.name,n:menuItem.n,p:menuItem.p,qty:1});
+renderCart();
+}
+function changeQty(n,delta){
+let f=cart.find(c=>c.n===n); if(!f) return;
+f.qty+=delta; if(f.qty<=0) cart=cart.filter(c=>c.n!==n);
+renderCart();
+}
+function renderCart(){
+let itemsDiv=document.getElementById("cartItems");
+let html="";
+if(!selRest){itemsDiv.innerHTML=""; return}
+selRest.menu.forEach((it,i)=>{
+let inCart=cart.find(c=>c.n===it.n);
+html+=`<div class="item-row"><div><b>${it.n}</b><div style="color:#777;font-size:13px">${it.p}ج</div></div><div class="q">${inCart?`<button onclick="changeQty('${it.n}',-1)">-</button><span>${inCart.qty}</span><button class="plus" onclick="changeQty('${it.n}',1)">+</button>`:`<button class="plus" onclick="addItem(${i})">+</button>`}</div></div>`
+});
+itemsDiv.innerHTML=html;
+let total=0,count=0;cart.forEach(c=>{total+=c.p*c.qty;count+=c.qty});
+if(count>0){
+document.getElementById("cartBar").classList.add("show");
+document.getElementById("cartCount").innerText=`${count} صنف • ${selRest.name}`;
+document.getElementById("cartTotal").innerText=`${total+20}ج شامل التوصيل`;
+}else{
+document.getElementById("cartBar").classList.remove("show");
+}
+}
+function openSheet(){document.getElementById("sheet").style.display="flex"}
+function closeSheet(){document.getElementById("sheet").style.display="none"}
+
 async function sendOrder(){
 let name=cName.value,phone=cPhone.value,addr=cAddr.value;
-if(!selItem)return alert("اختار صنف الأول");if(!name||!phone||!addr)return alert("كمل بياناتك");
-let total=selItem.p+20,profit=Math.round(selItem.p*0.15);
-status.innerText="⏳ بيتم الارسال...";
-let payload={restaurant:selRest.name,item:selItem.n+" - "+selItem.p+"ج",total,profit,name,phone,addr};
+if(cart.length==0) return alert("السلة فاضية");
+if(!name||!phone||!addr) return alert("كمل بياناتك");
+let itemsTotal=0;cart.forEach(c=>itemsTotal+=c.p*c.qty);
+let total=itemsTotal+20,profit=Math.round(itemsTotal*0.15);
+let itemsText=cart.map(c=>`${c.n} x${c.qty}`).join(" + ");
+document.getElementById("status").innerText="⏳ جاري الإرسال...";
+let payload={restaurant:selRest.name,item:itemsText,total,profit,name,phone,addr};
 try{
 await fetch("https://akkel.vercel.app/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
 let arr=JSON.parse(localStorage.getItem("akkel_orders")||"[]");arr.push({...payload,time:new Date().toLocaleString()});localStorage.setItem("akkel_orders",JSON.stringify(arr));
-status.innerText="✅ تم! بنفتحلك الواتساب...";
-let wa=`https://wa.me/2${phone}?text=أهلا ${name} طلبك من ${selRest.name} (${selItem.n}) تم ✅ الاجمالي ${total}ج - تتبع: https://alsadatmohammad399-bot.github.io/akkel/delivery.html`;
+document.getElementById("status").innerText="✅ تم!";
+let wa=`https://wa.me/2${phone}?text=طلبك من ${selRest.name}: ${itemsText} - الاجمالي ${total}ج - أكيل`;
 window.open(wa,"_blank");
-setTimeout(()=>{location.href=`delivery.html?name=${name}&phone=${phone}`},1200);
-}catch(e){status.innerText="❌ خطأ، جرب تاني"}
+setTimeout(()=>{location.href=`delivery.html?name=${name}&phone=${phone}`},1000);
+}catch(e){document.getElementById("status").innerText="❌ حصل خطأ"}
 }
-render();
+renderRests();
 </script>
 </body>
 </html>
